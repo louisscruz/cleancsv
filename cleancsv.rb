@@ -25,7 +25,7 @@ Dir.glob('input/*.csv') do |file|
   filename = File.basename(file)
   puts 'Currently processing ' + filename
 
-  rows = CSV.read(file, :headers => true, :skip_blanks => false).reject { |row| row.to_hash.values.all?(&:nil?) }.collect do |row|
+  rows = CSV.read(file, :headers => true, :skip_blanks => false, :encoding => 'windows-1251:utf-8').reject { |row| row.to_hash.values.all?(&:nil?) }.collect do |row|
     row.to_hash
   end
 
@@ -33,18 +33,20 @@ Dir.glob('input/*.csv') do |file|
   columns = rows.first.keys
   columns.delete(nil)
   if (columns.include?('First Name')) && (columns.include?('Last Name'))
+    old_rows = rows.length
     parse_names = false
-    rows = CSV.read(file, :headers => true, :skip_blanks => false).reject { |row| row.to_hash.values.all?(&:nil?) }.uniq {|r| [r[1].downcase, r[0].downcase]}.collect do |row|
+    rows = CSV.read(file, :headers => true, :skip_blanks => false, :encoding => 'windows-1251:utf-8').reject { |row| row.to_hash.values.all?(&:nil?) }.uniq {|r| [r[1].downcase, r[0].downcase]}.collect do |row|
       row.to_hash
     end
-    p parse_names
+    new_rows = rows.length
+    diff = old_rows - new_rows
+    p 'Found and removed a total of ' + diff.to_s + ' duplicates'
   else
     columns.delete('First Name')
     columns.delete('Last Name')
     new_columns = ['First Name', 'Last Name']
     columns += new_columns
-    p rows[0]
-    rows = CSV.read(file, :headers => true, :skip_blanks => false).reject { |row| row.to_hash.values.all?(&:nil?) }.uniq {|r| r[0]}.collect do |row|
+    rows = CSV.read(file, :headers => true, :skip_blanks => false, :encoding => 'windows-1251:utf-8').reject { |row| row.to_hash.values.all?(&:nil?) }.uniq {|r| r[0]}.collect do |row|
       row.to_hash
     end
   end
