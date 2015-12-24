@@ -21,7 +21,7 @@ def parse_name(values, row)
   return new_values += values
 end
 
-Dir.glob('csvs/*.csv') do |file|
+Dir.glob('input/*.csv') do |file|
   filename = File.basename(file)
   puts 'Currently processing ' + filename
 
