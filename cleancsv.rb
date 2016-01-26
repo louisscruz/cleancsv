@@ -11,7 +11,10 @@ class String
   end
 end
 
+global_start_time = Time.now
 Dir.glob('input/*.csv') do |file|
+  start_time = Time.now
+
   filename = File.basename(file)
   puts 'Currently processing ' + filename
 
@@ -49,6 +52,9 @@ Dir.glob('input/*.csv') do |file|
   Dir.chdir('./output') do
     File.open(filename, 'w') { |file| file.write(new_csv) }
   end
+  end_time = Time.now
 
-  puts "Successfully processed " + filename
+  puts 'Successfully processed ' + filename + ' in ' + ((end_time - start_time)).to_s + ' seconds'
 end
+global_end_time = Time.now
+puts 'Total run time: ' + (global_end_time - global_start_time).to_s + ' seconds'
