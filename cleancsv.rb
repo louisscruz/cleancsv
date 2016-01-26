@@ -12,7 +12,6 @@ class String
 end
 
 global_start_time = Time.now
-duplicates = 0
 
 Dir.glob('input/*.csv') do |file|
   start_time = Time.now
@@ -39,8 +38,7 @@ Dir.glob('input/*.csv') do |file|
   puts (rows_cache - post_name_cache).to_s + ' rows had duplicate names'
   rows.uniq! { |r| r['Borrower Home Phone']}.uniq! { |r| r['Borrower Business Phone']}
   puts (post_name_cache - rows.length).to_s + ' rows had duplicate phone numbers'
-  duplicates = rows_cache - rows.length
-  puts 'Deleted ' + duplicates.to_s + ' duplicates!'
+  puts 'Deleted ' + (rows_cache - rows.length).to_s + ' duplicates!'
 
 
   new_csv = CSV.generate do |csv|
@@ -64,6 +62,3 @@ end
 global_end_time = Time.now
 total_run_time = global_end_time - global_start_time
 puts 'Total run time: ' + total_run_time.to_s + ' seconds'
-
-%x(open ./output)
-%x(osascript -e 'tell app "Finder" to display dialog "Found a total of #{duplicates} duplicates! Total run time: #{total_run_time} seconds."' )
