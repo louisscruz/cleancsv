@@ -1,1 +1,5 @@
 *.csv
+etc/old
+input/old/
+input/divided_files
+output/old/

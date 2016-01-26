@@ -5,20 +5,10 @@ class String
   def remove_non_ascii(replacement='')
     self.gsub(/[\uFFFD]/, replacement)
   end
-end
 
-def parse_name(values, row)
-  parsed_name = row['Full Name'].split
-  if parsed_name.length > 2
-    until parsed_name.length == 2
-      parsed_name.delete_at(1)
-    end
+  def parse_name!
+    self.replace(self.split[0])
   end
-  new_values = []
-  parsed_name.each do |n|
-    new_values << n.capitalize
-  end
-  return new_values += values
 end
 
 Dir.glob('input/*.csv') do |file|
@@ -29,40 +19,30 @@ Dir.glob('input/*.csv') do |file|
     row.to_hash
   end
 
-  parse_names = true
+  puts 'File has a total of ' + rows.length.to_s + ' rows'
+
   columns = rows.first.keys
   columns.delete(nil)
-  if (columns.include?('First Name')) && (columns.include?('Last Name'))
-    old_rows = rows.length
-    parse_names = false
-    rows = CSV.read(file, :headers => true, :skip_blanks => false, :encoding => 'windows-1251:utf-8').reject { |row| row.to_hash.values.all?(&:nil?) }.uniq {|r| [r[1].downcase, r[0].downcase]}.collect do |row|
-      row.to_hash
-    end
-    new_rows = rows.length
-    diff = old_rows - new_rows
-    p 'Found and removed a total of ' + diff.to_s + ' duplicates'
-  else
-    columns.delete('First Name')
-    columns.delete('Last Name')
-    new_columns = ['First Name', 'Last Name']
-    columns += new_columns
-    rows = CSV.read(file, :headers => true, :skip_blanks => false, :encoding => 'windows-1251:utf-8').reject { |row| row.to_hash.values.all?(&:nil?) }.uniq {|r| r[0]}.collect do |row|
-      row.to_hash
-    end
+
+  if (!columns.include?('First Name') && !columns.include?('Last Name'))
+    return p 'Incompatible file columns'
   end
+
+  rows_cache = rows.length
+  rows.uniq! { |r| r.values_at('First Name', 'Last Name')}
+  post_name_cache = rows.length
+  puts (rows_cache - post_name_cache).to_s + ' rows had duplicate names'
+  rows.uniq! { |r| r.values_at('Borrower Home Phone', 'Borrower Business Phone')}
+  puts (post_name_cache - rows.length).to_s + ' rows had duplicate phone numbers'
+  puts 'Deleted ' + (rows_cache - rows.length).to_s + ' duplicates!'
 
   new_csv = CSV.generate do |csv|
     csv << columns
     rows.each do |row|
-      values = row.values.map! {|x| x.remove_non_ascii unless x == nil }
-      row.delete(nil)
-      if parse_names === true
-        csv << parse_name(values, row)
-      else
-        values[0].capitalize!
-        values[1].capitalize!
-        csv << values
-      end
+      row['First Name'].parse_name!
+      row['Last Name'].parse_name!
+      values = row.values.map! { |x| x.remove_non_ascii unless x == nil}
+      csv << values
     end
   end
 
