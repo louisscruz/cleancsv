@@ -1,5 +1,2 @@
 *.csv
-etc/old
-input/old/
-input/divided_files
-output/old/
+etc/all_old_data
